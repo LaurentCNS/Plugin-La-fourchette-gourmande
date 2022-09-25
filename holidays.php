@@ -60,8 +60,13 @@ function fermeture_admin_page_render() : void {
     <div class="wrap">
         <h1>Paramétrage de "Fermeture infos" :</h1>
         <blockquote style="color: #2062d8; margin-bottom: 50px; margin-top: 0">😎 Plugin développé par <a href="https://www.laurentcantos.fr" target="_blank">Laurent Cantos</a> pour "La fourchette gourmande".</blockquote>
-        <p>Suivez les indications de cette page pour indiquer sur la page d'accueil du site la fermeture du restaurant à vos clients.</p>
-        <p style="color: red; margin-bottom: 50px">La bannière d'information se désactivera automatiquement après le dernier jour de fermeture.</p>
+        <p style="margin-bottom: 50px">Suivez les indications de cette page pour indiquer sur la page d'accueil du site la fermeture du restaurant à vos clients.</p>
+        <h2>Informations d'utilisation:</h2>
+        <ul style="list-style-type:square; margin-left: 40px">
+        <li style="color: red; margin-bottom: 20px">La bannière d'information se désactivera automatiquement après le dernier jour de fermeture.</li>
+        <li style="color: red; margin-bottom: 20px">Les dates renseignées doivent être supérieures à la date actuelle.</li>
+        <li style="color: red; margin-bottom: 50px">Astuce: 💡 Pour indiquer une fermeture exceptionnelle, renseigner les deux dates d'une valeur identique.</li>
+        </ul>
         <form method="post" action="options.php">
             <?php
             settings_fields('holidays_settings'); // Correspond à option_group du register_setting
@@ -132,8 +137,8 @@ function holidays_insert_snippet_in_front()
 {
     // Si la page est la page d'accueil et que la bannière est activée
     if (get_option('holidays_radio_content') == '1' and is_front_page()) {
-        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture
-        if (date('Y-m-d') <= get_option('holidays_date_content_last_day')) {
+        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates sont différentes
+        if (date('Y-m-d') <= get_option('holidays_date_content_last_day') and get_option('holidays_date_content_first_day') != get_option('holidays_date_content_last_day') ) {
             // Affiche le snippet
             ?>
             <div id="ep-banner">
@@ -141,7 +146,15 @@ function holidays_insert_snippet_in_front()
             </div>
             <?php
         }
-
+        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates sont identiques
+        if (date('Y-m-d') <= get_option('holidays_date_content_last_day') and get_option('holidays_date_content_first_day') === get_option('holidays_date_content_last_day') ) {
+            // Affiche le snippet
+            ?>
+            <div id="ep-banner">
+                <p>Fermeture exceptionnelle le <b><?php echo date_i18n('l j F Y', strtotime(get_option('holidays_date_content_last_day')));?></b></p>
+            </div>
+            <?php
+        }
     }
 }
 add_action('wp_footer', 'holidays_insert_snippet_in_front');

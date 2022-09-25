@@ -1,9 +1,9 @@
 #ep-banner {
     width: 100%;
     position: absolute;
-    top: 97px;
+    top: 65px;
     text-align: center;
-    background: #cac7c7;
+    background: #e5b90d;
     padding: 10px 0;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 }
@@ -14,13 +14,13 @@
 
 @media (max-width: 1024px) {
     #ep-banner {
-        top: 75px;
+        top: 45px;
     }
 }
 
 @media (max-width: 785px) {
     #ep-banner {
-        top: 285px;
+        top: 235px;
         height: 55px;
         padding: 0;
     }
@@ -33,7 +33,7 @@
 
 @media (max-width: 670px) {
     #ep-banner {
-        top: 260px;
+        top: 210px;
         height: 50px;
         padding: 0;
     }
@@ -46,7 +46,7 @@
 
 @media (max-width: 577px) {
     #ep-banner {
-        top: 230px;
+        top: 190px;
         height: 40px;
         padding: 0;
     }
@@ -59,6 +59,6 @@
 
 @media (max-width: 477px) {
     #ep-banner {
-        top: 212px;
+        top: 160px;
     }
 }
