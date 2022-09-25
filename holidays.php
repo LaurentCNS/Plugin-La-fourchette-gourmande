@@ -11,6 +11,10 @@
 // SECURITY - Bloquer l'accès direct au fichier
 defined('ABSPATH') or die('Access denied');
 
+// Variables globales
+define('PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('PLUGIN_URL', plugin_dir_url(__FILE__));
+
 
 /*
  * Ajoute le bouton du plugin dans le back-admin
@@ -29,51 +33,20 @@ function holidays_admin_menu() : void {
 add_action('admin_menu', 'holidays_admin_menu');
 
 
-/*
- * Enregistre les champs de la bdd, les sections et les inputs
- */
 function holidays_register_settings() : void {
     // Enregistre un champ dans la table wp_options pour stocker la première date de fermeture
-    register_setting('holidays_settings_group_first', 'holidays_date_content_first_day');
+    register_setting('holidays_settings', 'holidays_date_content_first_day');
 
-    // Enregistre un champ dans la table wp_options pour stocker la seconde date de fermeture
-    register_setting('holidays_settings_group_last', 'holidays_date_content_last_day');
+    // Enregistre un champ pour stocker la seconde date de fermeture
+    register_setting('holidays_settings', 'holidays_date_content_last_day');
 
-    // Enregistre une checkbox pour activer ou non la fermeture avec une option de type booléen
-    register_setting('holidays_settings_group_checkbox', 'holidays_checkbox_content');
+    // Enregistre un champ pour activer ou non la fermeture
+    register_setting('holidays_settings', 'holidays_radio_content');
 
-    // Ajouter une section de reglage
-    add_settings_section(
-        'holidays_section_text',
-        'Réglages des dates de fermeture du restaurant "La fourchette gourmande"',
-        '',
-        'Fermeture_infos'
-    );
-
-    // Enregistrer la date picker pour le premier jour de fermeture
-    add_settings_field(
-        'holidays_date_content_first_day',  // Correspond à option_name du register_setting
-        'Premier jour de fermeture:',
-        'holidays_date_field_first', // Pour créer le champ
-        'Fermeture_infos',
-        'holidays_section_text'
-    );
-    // Enregistrer la date picker pour le second jour de fermeture
-    add_settings_field(
-        'holidays_date_content_last_day',  // Correspond à option_name du register_setting
-        'Dernier jour de fermeture:',
-        'holidays_date_field_last', // Pour créer le champ
-        'Fermeture_infos',
-        'holidays_section_text'
-    );
-    // Enregistrer la checkbox pour activer ou non la fermeture
-    add_settings_field(
-        'holidays_checkbox_content',  // Correspond à option_name du register_setting
-        'Activer la fermeture (si coché):',
-        'holidays_checkbox_field', // Pour créer le champ
-        'Fermeture_infos',
-        'holidays_section_text'
-    );
+    // Include le fichier déporté
+    include_once PLUGIN_DIR . 'inc/holidays_settings_sections.php';
+    // Lance la fonction déportée qui enregistre les sections et les inputs
+    holidays_sections_settings();
 }
 // Lancer la fonction dans le hook admin_init
 add_action('admin_init', 'holidays_register_settings');
@@ -86,16 +59,16 @@ function fermeture_admin_page_render() : void {
     ?>
     <div class="wrap">
         <h1>Paramétrage de "Fermeture infos" :</h1>
-        <p>Suivez les indications de cette page pour indiquer la fermeture du restaurant à vos clients sur la page d'accueil.</p>
-        <p>Cocher la case pour activer la fermeture (décocher pour la désactiver).</p>
-        <p style="color: red; margin-bottom: 50px">Attention, sauvegarder avant de quitter pour mettre à jour !</p>
+        <blockquote style="color: #2062d8; margin-bottom: 50px; margin-top: 0">😎 Plugin développé par <a href="https://www.laurentcantos.fr" target="_blank">Laurent Cantos</a> pour "La fourchette gourmande".</blockquote>
+        <p>Suivez les indications de cette page pour indiquer sur la page d'accueil du site la fermeture du restaurant à vos clients.</p>
+        <p style="color: red; margin-bottom: 50px">La bannière d'information se désactivera automatiquement après le dernier jour de fermeture.</p>
         <form method="post" action="options.php">
             <?php
-            settings_fields('holidays_settings_group_first'); // Correspond à option_group du register_setting
-            settings_fields('holidays_settings_group_last'); // Correspond à option_group du register_setting
-            settings_fields('holidays_settings_group_checkbox'); // Correspond à option_group du register_setting
+            settings_fields('holidays_settings'); // Correspond à option_group du register_setting
+            settings_fields('holidays_settings');
+            settings_fields('holidays_settings');
             do_settings_sections('Fermeture_infos'); // Correspond à page du add_settings_section
-            submit_button('sauvegarder'); // Créer le bouton de sauvegarde
+            submit_button('Sauvegarder'); // Créer le bouton de sauvegarde
             ?>
         </form>
     </div>
@@ -103,32 +76,72 @@ function fermeture_admin_page_render() : void {
 }
 
 
-/*
- * Sauvegarde la date de fermeture du premier jour
- */
-function holidays_date_field_first() : void { // Callback de add_settings_field
-    $holidays_date_content_first = get_option('holidays_date_content_first_day');  // récupère les infos de la bdd - option_name du register_setting
-    ?>
-    <input type="date" name="holidays_date_content_first_day" value="<?php echo $holidays_date_content_first; ?>" />
-    <?php
-}
+// Charger le fichier déporté des fonctions des rendus des input
+include_once PLUGIN_DIR . 'inc/holidays_render_sections.php';
+
 
 /*
- * Sauvegarde la date de fermeture du dernier jour
+ * Ajout du script et du style seulement sur la page d'administration du plugin
  */
-function holidays_date_field_last() : void { // Callback de add_settings_field
-    $holidays_date_content_last = get_option('holidays_date_content_last_day');  // récupère les infos de la bdd - option_name du register_setting
-    ?>
-    <input type="date" name="holidays_date_content_last_day" value="<?php echo $holidays_date_content_last; ?>" />
-    <?php
+function holidays_enqueue_admin_style_script($page_id): void
+{
+    // var_dump($page_id);  // Pour connaitre l'id de la page
+    if ($page_id === 'toplevel_page_Fermeture_infos') {
+        wp_register_style('holidays-css', PLUGIN_URL . 'assets/css/admin.css', array());
+        wp_enqueue_style('holidays-css');
+        wp_register_script('holidays-js', PLUGIN_URL . 'assets/js/admin.js', array("jquery"), '', true);
+        wp_enqueue_script('holidays-js');
+    }
 }
+add_action('admin_enqueue_scripts', 'holidays_enqueue_admin_style_script');
+
 
 /*
- * Sauvegarde la checkbox pour activer ou non la fermeture
+ * Charge les scripts et styles sur le front
  */
-function holidays_checkbox_field() : void { // Callback de add_settings_field
-    $holidays_checkbox_content = get_option('holidays_checkbox_content');  // récupère les infos de la bdd - option_name du register_setting
-    ?>
-    <input type="checkbox" name="holidays_checkbox_content" value="1" <?php checked(1, $holidays_checkbox_content, true); ?> />
-    <?php
+function holidays_enqueue_front_styles_scripts(): void
+{
+    wp_register_style('holidays-front-css', PLUGIN_URL . 'assets/css/front.css', array());
+    wp_enqueue_style('holidays-front-css');
+    wp_register_script('holidays-front-js', PLUGIN_URL . 'assets/js/front.js', array("jquery"), '', true);
+    wp_enqueue_script('holidays-front-js');
+
+    // Envoie les réglages enrégistrés dans la bdd au fichier js
+    wp_localize_script('holidays-front-js', 'settings', array(
+        'first_day' => get_option('holidays_date_content_first_day'),
+        'last_day' => get_option('holidays_date_content_last_day'),
+        'is_active' => get_option('holidays_radio_content'),
+    ));
 }
+add_action('wp_enqueue_scripts', 'holidays_enqueue_front_styles_scripts');
+
+
+// Si la date actuelle est supérieur à la date de fermeture (reset du champ radio)
+function holidays_check_date(){
+    if ((date('Y-m-d') > get_option('holidays_date_content_last_day'))) {
+        update_option('holidays_radio_content', '0');
+    };
+};
+add_action('init', 'holidays_check_date');
+
+
+/*
+ * Conditions d'affichage du message de fermeture
+ */
+function holidays_insert_snippet_in_front()
+{
+    // Si la page est la page d'accueil et que la bannière est activée
+    if (get_option('holidays_radio_content') == '1' and is_front_page()) {
+        // Si la date actuelle est inférieur à la date de fermeture
+        if (date('Y-m-d') <= get_option('holidays_date_content_last_day')) {
+            // Affiche le snippet
+            ?>
+            <div id="ep-banner">
+                <p>Fermé du <b><?php echo date_i18n('j F Y', strtotime(get_option('holidays_date_content_first_day')));?></b> au <b><?php echo date_i18n('j F Y', strtotime(get_option('holidays_date_content_last_day')));?></b> inclus</p>
+            </div>
+            <?php
+        }
+
+    }
+}
+add_action('wp_footer', 'holidays_insert_snippet_in_front');
