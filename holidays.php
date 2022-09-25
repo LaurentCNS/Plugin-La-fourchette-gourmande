@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: Fermeture infos
- * Description: Plugin indiquant les dates de fermeture de l'établissement "La fourchette gourmande" sur lea page home du theme.
+ * Description: Plugin indiquant les dates de fermeture de l'établissement "La fourchette gourmande" sur la page home du site.
  * Version: 1.0
  * Author: Laurent Cantos
  * Author URI: http://www.laurentcantos.fr
