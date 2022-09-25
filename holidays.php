@@ -43,7 +43,7 @@ function holidays_register_settings() : void {
     // Enregistre un champ pour activer ou non la fermeture
     register_setting('holidays_settings', 'holidays_radio_content');
 
-    // Include le fichier déporté
+    // Include du fichier déporté
     include_once PLUGIN_DIR . 'inc/holidays_settings_sections.php';
     // Lance la fonction déportée qui enregistre les sections et les inputs
     holidays_sections_settings();
@@ -116,7 +116,7 @@ function holidays_enqueue_front_styles_scripts(): void
 add_action('wp_enqueue_scripts', 'holidays_enqueue_front_styles_scripts');
 
 
-// Si la date actuelle est supérieur à la date de fermeture (reset du champ radio)
+// Si la date actuelle est supérieur au dernier jour de fermeture (value à 0, reset du champ radio)
 function holidays_check_date(){
     if ((date('Y-m-d') > get_option('holidays_date_content_last_day'))) {
         update_option('holidays_radio_content', '0');
@@ -132,7 +132,7 @@ function holidays_insert_snippet_in_front()
 {
     // Si la page est la page d'accueil et que la bannière est activée
     if (get_option('holidays_radio_content') == '1' and is_front_page()) {
-        // Si la date actuelle est inférieur à la date de fermeture
+        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture
         if (date('Y-m-d') <= get_option('holidays_date_content_last_day')) {
             // Affiche le snippet
             ?>
