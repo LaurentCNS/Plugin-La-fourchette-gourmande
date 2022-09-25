@@ -64,7 +64,7 @@ function fermeture_admin_page_render() : void {
         <h2>Informations d'utilisation:</h2>
         <ul style="list-style-type:square; margin-left: 40px">
         <li style="color: red; margin-bottom: 20px">La bannière d'information se désactivera automatiquement après le dernier jour de fermeture.</li>
-        <li style="color: red; margin-bottom: 20px">Les dates renseignées doivent être supérieures à la date actuelle.</li>
+        <li style="color: red; margin-bottom: 20px">Le dernier jour de fermeture renseigné doit être supérieur ou égal à la date actuelle.</li>
         <li style="color: red; margin-bottom: 50px">Astuce: 💡 Pour indiquer une fermeture exceptionnelle, renseigner les deux dates d'une valeur identique.</li>
         </ul>
         <form method="post" action="options.php">
@@ -137,7 +137,7 @@ function holidays_insert_snippet_in_front()
 {
     // Si la page est la page d'accueil et que la bannière est activée
     if (get_option('holidays_radio_content') == '1' and is_front_page()) {
-        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates sont différentes
+        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates renseignées sont différentes
         if (date('Y-m-d') <= get_option('holidays_date_content_last_day') and get_option('holidays_date_content_first_day') != get_option('holidays_date_content_last_day') ) {
             // Affiche le snippet
             ?>
@@ -146,7 +146,7 @@ function holidays_insert_snippet_in_front()
             </div>
             <?php
         }
-        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates sont identiques
+        // Si la date actuelle est inférieur ou égale au dernier jour de fermeture et que les deux dates renseignées sont identiques
         if (date('Y-m-d') <= get_option('holidays_date_content_last_day') and get_option('holidays_date_content_first_day') === get_option('holidays_date_content_last_day') ) {
             // Affiche le snippet
             ?>
